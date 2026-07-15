@@ -252,7 +252,7 @@ OpenCode loads the bundled `.opencode/` plugin, which auto-discovers each skill 
 | `get_token_balance` | TRC20 token balance (USDT, USDD, etc.) |
 | `check_allowance` | Check TRC20 approval status for JustLend contracts |
 
-Each read tool takes an `address` and/or a token/jToken argument (exact inputs are in each skill's `SKILL.md`) and returns JSON. On failure a tool returns a structured error `{ code, message, retryable }` — **not** a thrown exception — so the agent can branch on `retryable`.
+Each read tool takes an `address` and/or a token/jToken argument (exact inputs are in each skill's `SKILL.md`) and returns JSON. On failure the **bundled server** returns a plain-text `Error: <message>` result flagged `isError` — never a thrown exception. The **full server** goes further and structures errors as `{ error, errorCode, retryable, hint }`, so an agent can branch on `retryable` and act on the `hint` without parsing prose.
 
 ## Skill Inputs, Outputs & Failure Handling
 
@@ -291,7 +291,7 @@ No funds move — the agent stops at advice because this package is read-only.
 
 **User:** *"Supply 500 USDT to JustLend."* → **`justlend-lending-v1`**
 1. `check_allowance` (read) — is USDT approved for the jUSDT market?
-2. If not: `approve_underlying` — the agent shows amount + spender and **waits for user confirmation** before signing. USDT requires a reset-to-0 before a new non-zero approval; the tool handles it.
+2. If not: `approve_underlying` — the agent shows amount + spender and **waits for user confirmation** before signing. For USDT/USDC/USDJ the tool defensively resets the allowance to 0 first (parity with the official front-end), so the user may see two transactions; the tool sequences them automatically.
 3. `supply` — **HITL confirm** (amount, market, direction), simulate first, then sign.
 4. `get_account_summary` (read) — verify the new supply balance and health factor.
 
@@ -301,7 +301,7 @@ No funds move — the agent stops at advice because this package is read-only.
 
 - **Insufficient allowance** → agent surfaces the missing approval and proposes `approve_underlying` (HITL), never a silent MAX approval.
 - **Health factor would breach** → agent refuses or warns before a borrow/withdraw that pushes `shortfallUSD > 0`.
-- **Rate limit (TronGrid 429)** → read tools return `{ retryable: true }`; the agent backs off and retries. Writes are **not** retried automatically.
+- **Rate limit (TronGrid 429)** → reads are safe to retry after a short backoff (the full server marks these `errorCode: "transient"`, `retryable: true`). Writes are **not** retried automatically.
 - **Full server not installed** → a write skill reports the missing dependency and points to [@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend); it does not fake a transaction.
 
 ## Safety & Boundaries
@@ -329,7 +329,7 @@ No funds move — the agent stops at advice because this package is read-only.
 
 - **Wrong skill / wrong market** → because writes are HITL, catch it at the confirm prompt: reject and restate market + amount. Nothing signs without approval.
 - **A write may have half-landed** (client crash, timeout) → do **not** re-send. Re-query `get_account_summary` (or `get_vote_info` / balances) for the real state, then decide.
-- **Accidental approval** → set the allowance back to 0 (the same reset-to-0 the USDT-class tokens already require).
+- **Accidental approval** → revoke by setting the allowance back to 0 (`amount='0'` on the approve tool — the same `approve(0)` the write flow uses).
 - **Stuck in unbonding / locked votes** → these are protocol timelocks, not errors; wait out the period, then `unstake_strx` / `withdraw_votes_*`.
 
 ## Data & Privacy
