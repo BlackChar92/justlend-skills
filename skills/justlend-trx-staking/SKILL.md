@@ -10,6 +10,9 @@ description: >-
 
 # JustLend sTRX Staking
 
+Before a write, explicitly load [Shared write safety v1](../SAFETY.md) from this
+checkout. The host/agent owns loading and confirmation; if unavailable, remain read-only.
+
 Liquid staking skill for TRX on JustLend. Stake TRX to receive sTRX tokens, which earn staking rewards automatically while remaining usable in DeFi protocols.
 
 > **Note**: This skill requires the full MCP server ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)) which provides `stake_trx_to_strx`, `unstake_strx`, `get_strx_dashboard`, and other staking tools.
@@ -30,7 +33,23 @@ Liquid staking skill for TRX on JustLend. Stake TRX to receive sTRX tokens, whic
 | `check_strx_withdrawal_eligibility` | Unbonding status and withdrawal readiness | No |
 | `stake_trx_to_strx` | Stake TRX to receive sTRX | **Yes** |
 | `unstake_strx` | Unstake sTRX (starts unbonding period) | **Yes** |
-| `claim_strx_rewards` | Claim staking rewards | **Yes** |
+| `claim_strx_rewards` | Calls `claimAll` to collect available TRX after unbonding | **Yes** |
+
+## Unstake, wait, then claim
+
+1. Query the balance and current unfreeze delay; preview and confirm `unstake_strx`
+   with the exact sTRX amount. It starts unbonding; it is not the final claim step.
+2. After the waiting period, call `check_strx_withdrawal_eligibility` and
+   `get_strx_account`. Preserve `source` / `note`; unavailable amounts or rounds
+   are unknown, not a zero balance or an empty queue. On clients exposing the
+   detailed eligibility contract, inspect `claimEligibility`, `dataStatus` and
+   `unknownFields`; older outputs must not override a degraded account result.
+3. If availability is unknown, stop and re-query later. If the known claimable
+   amount is zero, explain that nothing is currently claimable. Do not call
+   `unstake_strx` again to collect an existing unlocked withdrawal.
+4. For a known positive amount, preview and confirm `claim_strx_rewards` separately.
+   Check its receipt, TRX balance and refreshed claimable amount before reporting
+   success. An unknown tx result must be reconciled before considering another claim.
 
 ## Examples
 

@@ -10,6 +10,9 @@ description: >-
 
 # JustLend DAO Governance
 
+Before a write, explicitly load [Shared write safety v1](../SAFETY.md) from this
+checkout. The host/agent owns loading and confirmation; if unavailable, remain read-only.
+
 Governance skill for participating in JustLend DAO proposals. View proposals, deposit JST for voting power, cast votes, and reclaim votes after proposals end.
 
 > **Note**: This skill requires the full MCP server ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)) which provides `get_proposal_list`, `cast_vote`, `deposit_jst_for_votes`, and other governance tools.

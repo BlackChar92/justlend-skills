@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import test from "node:test";
 import {
   MCP_OUTPUT_SCHEMA_VERSION,
@@ -12,6 +12,14 @@ import { MCP_TOOLS } from "../scripts/mcp_tools.mjs";
 const readJson = (relativePath) =>
   JSON.parse(readFileSync(new URL(relativePath, import.meta.url), "utf8"));
 
+test("V2 liquidation guidance separates candidates and cost quotes from eligibility", () => {
+  const skill = readFileSync(new URL("../skills/justlend-lending-v2/SKILL.md", import.meta.url), "utf8");
+  assert.doesNotMatch(skill, /Positions currently liquidatable|find liquidatable positions|1\.0 = liquidatable/);
+  assert.match(skill, /inclusion is not proof of eligibility/);
+  assert.match(skill, /healthy or unknown, stop/);
+  assert.match(skill, /does not check borrower health/);
+});
+
 test("package and client manifests share one release version", () => {
   const packageVersion = readJson("../package.json").version;
   assert.equal(packageVersion, "1.1.1");
@@ -19,6 +27,20 @@ test("package and client manifests share one release version", () => {
   assert.equal(readJson("../.claude-plugin/plugin.json").version, packageVersion);
   assert.equal(readJson("../.claude-plugin/marketplace.json").plugins[0].version, packageVersion);
   assert.equal(readJson("../.cursor-plugin/plugin.json").version, packageVersion);
+});
+
+test("every distributed write module can resolve its shared safety dependency", () => {
+  const meta = readJson("../skills/_meta.json");
+  const shared = realpathSync(new URL("../skills/SAFETY.md", import.meta.url));
+  for (const { id } of meta.skills) {
+    const moduleUrl = new URL(`../skills/${id}/SKILL.md`, import.meta.url);
+    const text = readFileSync(moduleUrl, "utf8");
+    const links = [...text.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((match) => match[1]);
+    const safetyLink = links.find((link) => link.endsWith("/SAFETY.md"));
+    assert.ok(safetyLink, `${id} must declare its shared safety dependency`);
+    assert.equal(realpathSync(new URL(safetyLink, moduleUrl)), shared);
+    assert.ok(readFileSync(new URL(safetyLink, moduleUrl), "utf8").length > 0);
+  }
 });
 
 test("all nine bundled tools declare the common output schema", () => {

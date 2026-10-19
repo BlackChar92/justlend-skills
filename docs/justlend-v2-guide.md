@@ -16,7 +16,8 @@ markets** (the borrow side). Risk is contained per market instead of pooled acro
   curator allocates the liquidity across one or more isolated markets to earn yield.
 - **LLTV (Liquidation Loan-To-Value)**: An 18-decimal ratio defining the maximum borrow against
   collateral's oracle value. Cross it and the position becomes liquidatable.
-- **risk**: A 0–1 ratio of the current borrow to the maximum borrowable. `risk → 1` ⇒ liquidatable.
+- **risk**: Current borrow divided by maximum borrowable; it can exceed 1.
+  Approaching 1 is a risk warning, not proof that the position can be liquidated.
   V2 has **no single account-wide health factor** — risk is evaluated per market.
 - **IRM**: The interest-rate model contract for a market.
 - **Oracle**: The price feed (ResilientOracle) used to value collateral vs loan.
@@ -36,9 +37,12 @@ A common one-shot path is `supplyCollateralAndBorrow`, which supplies collateral
 single transaction.
 
 ## Liquidation
-Any address can act as a public liquidator: when a position's `risk` reaches 1 (borrow exceeds the
-`lltv`-implied limit), the liquidator repays part of the debt and seizes a proportional amount of
-collateral plus an incentive. Pending-liquidation lists and quotes are exposed via the MCP server.
+Any address can act as a public liquidator when the contract considers the position
+unhealthy. Borrow above the `lltv`-implied limit corresponds to `risk > 1`, not
+merely approaching 1. Rounded API values at 1 do not establish the exact boundary:
+use current on-chain `isHealthy` and a fresh liquidation quote. A liquidator repays
+part of the debt and seizes collateral plus an incentive. Pending-liquidation lists
+and quotes are exposed via the MCP server; they do not guarantee transaction success.
 
 ## Risk Management
 - Monitor each borrow position's `risk` ratio; keep it well below 1 (e.g. under 0.8) to survive

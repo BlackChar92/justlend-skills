@@ -10,6 +10,9 @@ description: >-
 
 # JustLend Energy Rental
 
+Before a write, explicitly load [Shared write safety v1](../SAFETY.md) from this
+checkout. The host/agent owns loading and confirmation; if unavailable, remain read-only.
+
 Energy rental skill for the JustLend marketplace. Rent TRON Energy at lower cost than burning TRX, enabling more efficient smart contract interactions.
 
 > **Note**: This skill requires the full MCP server ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)) which provides `rent_energy`, `get_energy_rental_dashboard`, `calculate_energy_rental_price`, and other rental tools.

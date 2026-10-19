@@ -281,14 +281,31 @@ Each read tool declares both `inputSchema` and `outputSchema`. Successful calls 
 
 Failures are flagged `isError` and return the same JSON in text and `structuredContent`: `{ schemaVersion, tool, error, errorCode, retryable, hint }`. Stable codes are `invalid_input`, `authentication`, `rate_limit`, `transient`, and `internal`. Only `rate_limit` and `transient` are safe to retry automatically, using backoff. Consumers should pin the schema major and prefer `structuredContent`; the full server uses the same `schemaVersion` / `tool` / `result` success fields.
 
+The version above covers the bundled server's envelope and stable error codes,
+not every nested upstream API field. The full server's failures may instead be
+JSON text with `isError: true`; do not assume they share this bundled error
+envelope. Unknown codes or absent retryability stop the write workflow. Validate
+critical business fields against the connected full tool's schema; an unavailable
+value is not zero. Pin the package/source revision when consuming payload details.
+
+### Shared safety loading
+
+Every write module explicitly links [Shared write safety v1](skills/SAFETY.md).
+The host/agent must load that file when selecting a write module; README/root
+skill discovery does **not** automatically inject it. Keep the complete `skills/`
+tree when installing or symlinking, including `SAFETY.md`. If it is inaccessible,
+remain read-only and report the missing resource. The rules identify confirmation,
+refusal/re-confirmation, prechecks, unknown errors and unresolved-write recovery
+responsibilities. Their revision is separate from package/deployment versions.
+
 ## Skill Inputs, Outputs & Failure Handling
 
 | Skill | Reads with | Writes with (full server) | Returns | On failure |
 |-------|-----------|---------------------------|---------|-----------|
 | `justlend-dao` (base) | the 9 read tools above | — | market / account JSON | retryable read errors (rate-limit, timeout) are safe to retry with backoff |
 | `justlend-lending-v1` | `get_account_summary`, `check_allowance` | `approve_underlying` → `supply` / `borrow` / `repay` / `withdraw` | tx hash + post-state | **never auto-retry a write** — a repay/borrow may have landed; re-query `get_account_summary` first |
-| `justlend-lending-v2` | market / vault reads | `approve_vault` → `supply_collateral` / `borrow` / `withdraw_collateral` / `liquidate` | tx hash + position | same no-retry rule; `liquidate` is irreversible — confirm target and amount |
-| `justlend-trx-staking` | balance reads | `stake_trx_to_strx` / `unstake_strx` | tx hash | `unstake_strx` starts an **unbonding period** — not instant |
+| `justlend-lending-v2` | market / vault reads | `approve_moolah_vault` / `approve_moolah_proxy` → `moolah_vault_deposit` / `moolah_supply_collateral` / `moolah_borrow` / `moolah_withdraw_collateral` / `moolah_liquidate` | tx hash + position | same no-retry rule; liquidation is irreversible — confirm target and amount |
+| `justlend-trx-staking` | balance / eligibility reads | `stake_trx_to_strx` / `unstake_strx` / `claim_strx_rewards` | tx hash + post-state | `unstake_strx` starts an **unbonding period**; use `claim_strx_rewards` to collect available TRX afterward |
 | `justlend-energy-rental` | market reads | rental tools | tx hash + order | quote first; price can move between quote and order |
 | `justlend-energy-purchase` | config / quote / order / public history / payment risk | `buy_energy_direct` | payment tx + order state | confirm exact quote; backend broadcasts; ambiguous results block a second payment |
 | `justlend-governance-v1` | `get_proposal_list`, `get_vote_info` | `approve_jst_for_voting` → `deposit_jst_for_votes` → `cast_vote` → `withdraw_votes_*` | tx hash + vote state | `deposit_jst_for_votes` locks JST as WJST until withdrawal |
@@ -331,6 +348,7 @@ No funds move — the agent stops at advice because this project is read-only.
 - **Health factor would breach** → agent refuses or warns before a borrow/withdraw that pushes `shortfallUSD > 0`.
 - **Rate limit (TronGrid 429)** → reads are safe to retry after a short backoff (the full server marks these `errorCode: "transient"`, `retryable: true`). Writes are **not** retried automatically.
 - **Full server not installed** → a write skill reports the missing dependency and points to [@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend); it does not fake a transaction.
+- **sTRX claim availability unknown** → preserve `null`, provenance and degradation notes; re-query `get_strx_account` / `check_strx_withdrawal_eligibility`. Do not report a zero claim or submit a claim from unknown data.
 
 ## Safety & Boundaries
 
@@ -360,7 +378,8 @@ No funds move — the agent stops at advice because this project is read-only.
 - **A write may have half-landed** (client crash, timeout) → do **not** re-send. Re-query `get_account_summary` (or `get_vote_info` / balances) for the real state, then decide.
 - **Direct-purchase result unknown** → call `get_energy_purchase_history`, then call `get_energy_payment_risk` with no arguments. The configured-wallet risk check is read-only and never replays a payment. Never sign a second payment while the first is unresolved; any exact-request replay occurs only inside a separately confirmed `buy_energy_direct` call.
 - **Accidental approval** → revoke by setting the allowance back to 0 (`amount='0'` on the approve tool — the same `approve(0)` the write flow uses).
-- **Stuck in unbonding / locked votes** → these are protocol timelocks, not errors; wait out the period, then `unstake_strx` / `withdraw_votes_*`.
+- **Stuck in sTRX unbonding** → wait, then query `check_strx_withdrawal_eligibility` and `get_strx_account`. If a positive amount is known, separately confirm `claim_strx_rewards`; verify its receipt and refreshed balance/claimable amount. Do not call `unstake_strx` again to collect an existing round.
+- **Locked votes** → query proposal/vote status after the timelock, then separately confirm `withdraw_votes_from_proposal` and, if requested, `withdraw_votes_to_jst`; verify the resulting vote/token balances.
 
 ## Data & Privacy
 

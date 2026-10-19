@@ -10,6 +10,9 @@ description: >-
 
 # JustLend V2 Lending
 
+Before a write, explicitly load [Shared write safety v1](../SAFETY.md) from this
+checkout. The host/agent owns loading and confirmation; if unavailable, remain read-only.
+
 Isolated-market lending skill for **JustLend V2** on TRON — a Morpho-style protocol that
 separates the supply side (curated **ERC4626 vaults**) from the borrow side (permissionless
 **isolated markets**). Each market is a single `(loanToken, collateralToken, oracle, irm, lltv)`
@@ -32,7 +35,7 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
 | Risk model | Shared pool, one health factor across all assets | Per-market, isolated collateral/loan pair |
 | Supply | Supply any market directly | Deposit into a **vault** (ERC4626) that allocates across markets |
 | Borrow | Borrow against pooled collateral | `supplyCollateral` into a market, then `borrow` the loan token |
-| Risk metric | `shortfallUSD` / health factor | `risk` (0–1 ratio of borrow vs max) + market `lltv` |
+| Risk metric | `shortfallUSD` / health factor | `risk` (borrow / max borrowable; can exceed 1) + market `lltv` |
 | Skill | [justlend-lending-v1](../justlend-lending-v1/SKILL.md) | this skill |
 
 ## Core concepts
@@ -43,7 +46,10 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
   identified by a `bytes32` market id. You `supplyCollateral`, then `borrow` up to `lltv` of the
   collateral's oracle value, and `repay` / `withdrawCollateral` to unwind.
 - **LLTV** — Liquidation Loan-To-Value (18-decimal ratio). Borrow position must stay below it.
-- **risk** — 0–1 ratio of current borrow to max borrowable. `risk → 1` means liquidatable. There is
+- **risk** — ratio of current borrow to max borrowable; it can exceed 1. Approaching
+  1 is a warning, not proof of liquidation eligibility. A ratio above 1 indicates
+  debt above the limit; rounded API values at 1 do not settle the exact boundary.
+  Use current on-chain health and a fresh liquidation quote before acting. There is
   **no single account-wide health factor** in V2; risk is per-market.
 - **Liquidation** — a public liquidator can repay an unhealthy position's debt and seize collateral.
 
@@ -74,7 +80,7 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
 ### Liquidation
 | Tool | Description | Write? |
 |------|-------------|--------|
-| `get_moolah_pending_liquidations` | Positions currently liquidatable | No |
+| `get_moolah_pending_liquidations` | Liquidation candidates, potentially including near-threshold positions; verify current on-chain health | No |
 | `get_moolah_liquidation_quote` | Seize/repay quote for liquidating a position | No |
 | `get_moolah_liquidation_records` | Historical V2 liquidations | No |
 | `approve_liquidator_token` | Approve the repay token for the public liquidator | **Yes** |
@@ -107,12 +113,20 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
 ### Risk is per-market, not account-wide
 Unlike V1's single health factor, V2 risk lives in each market. Always call
 `get_moolah_user_position` (or `get_moolah_history` for the full picture) and inspect the
-`risk` ratio (0–1) **and** the market `lltv` before advising. `risk` near 1 ⇒ liquidatable.
+`risk` ratio **and** the market `lltv` before advising. Near 1 means little safety
+margin, not automatic eligibility. The contract's current `isHealthy` result is
+authoritative; obtain a fresh `get_moolah_liquidation_quote` for cost estimation.
+The quote takes no borrower address and does not check borrower health; a successful
+quote is not proof of eligibility. Do not decide from rounded/stale API values alone.
 
 ### Approve before write
-Vault deposits need `approve_moolah_vault`; market collateral/borrow/repay need
-`approve_moolah_proxy`; liquidation needs `approve_liquidator_token`. The full server returns a
-structured `errorCode: INSUFFICIENT_ALLOWANCE` with a `hint` if you skip this — approve, then retry.
+TRC20 vault deposits need `approve_moolah_vault`; market collateral supply and
+TRC20 repayment need `approve_moolah_proxy`; liquidation needs
+`approve_liquidator_token`. Borrowing and collateral withdrawal do not themselves
+need a new token allowance. The full server returns a
+structured `errorCode: insufficient_allowance` with a `hint` when allowance is missing.
+Confirm the necessary approval separately, recheck it, then confirm the intended write;
+the error is not permission to retry automatically.
 
 ### Vaults are the supply side, markets are the borrow side
 To *earn*, use a **vault** (`moolah_vault_deposit`). To *borrow*, use a **market**
@@ -132,9 +146,10 @@ To *earn*, use a **vault** (`moolah_vault_deposit`). To *borrow*, use a **market
 4. `moolah_repay` → `moolah_withdraw_collateral` to unwind
 
 ### Liquidate an unhealthy position
-1. `get_moolah_pending_liquidations` — find liquidatable positions
-2. `get_moolah_liquidation_quote` — check seize vs repay economics
-3. `approve_liquidator_token` → `moolah_liquidate`
+1. `get_moolah_pending_liquidations` — find candidates; inclusion is not proof of eligibility.
+2. Verify the target borrower's current on-chain health. If it is healthy or unknown, stop.
+3. `get_moolah_liquidation_quote` — check seize vs repay economics; this is not a borrower-health check.
+4. Separately confirm `approve_liquidator_token`, recheck allowance, then separately confirm `moolah_liquidate`. Verify the receipt and post-state.
 
 ## Examples
 

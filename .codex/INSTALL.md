@@ -30,7 +30,15 @@ JustLend Skills is distributed from GitHub and is not published to the npm regis
 
 ```bash
 ls ~/.agents/skills/justlend-skills
+test -r ~/.agents/skills/justlend-skills/SAFETY.md
 ```
+
+Keep the complete symlinked tree. Each write module instructs the agent to load
+`../SAFETY.md` (shared write safety v1) explicitly before a write; merely discovering
+modules does not load their linked rules. If a client copies module folders, it
+must preserve this relative resource too, or the module remains read-only. This
+filesystem check verifies packaging, not that a particular client obeyed the
+loading/confirmation workflow; inspect that client's run when validating it.
 
 ## Available Skills
 
