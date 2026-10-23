@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import guard from '../scripts/check-node-version.cjs';
+
+test('accepts v24.22.1', () => assert.equal(guard.isSupportedNodeVersion("v24.22.1"), true));
+test('accepts 24.22.1', () => assert.equal(guard.isSupportedNodeVersion("24.22.1"), true));
+test('rejects v24.22.0', () => assert.equal(guard.isSupportedNodeVersion("v24.22.0"), false));
+test('rejects v24.22.2', () => assert.equal(guard.isSupportedNodeVersion("v24.22.2"), false));
+test('rejects v24.21.1', () => assert.equal(guard.isSupportedNodeVersion("v24.21.1"), false));
+test('rejects v24.23.1', () => assert.equal(guard.isSupportedNodeVersion("v24.23.1"), false));
+test('rejects v23.22.1', () => assert.equal(guard.isSupportedNodeVersion("v23.22.1"), false));
+test('rejects v25.22.1', () => assert.equal(guard.isSupportedNodeVersion("v25.22.1"), false));
+test('rejects v22.23.4', () => assert.equal(guard.isSupportedNodeVersion("v22.23.4"), false));
+test('rejects v26.12.1', () => assert.equal(guard.isSupportedNodeVersion("v26.12.1"), false));
+test('rejects v27.0.0', () => assert.equal(guard.isSupportedNodeVersion("v27.0.0"), false));
+test('rejects v24.22.1-rc.1', () => assert.equal(guard.isSupportedNodeVersion("v24.22.1-rc.1"), false));
+test('rejects v24.22.1+build', () => assert.equal(guard.isSupportedNodeVersion("v24.22.1+build"), false));
+test('rejects an empty version', () => assert.equal(guard.isSupportedNodeVersion(""), false));
+test('rejects v24.22', () => assert.equal(guard.isSupportedNodeVersion("v24.22"), false));
+test('rejects invalid', () => assert.equal(guard.isSupportedNodeVersion("invalid"), false));
+test('rejects v024.22.1', () => assert.equal(guard.isSupportedNodeVersion("v024.22.1"), false));

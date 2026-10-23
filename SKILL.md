@@ -16,7 +16,7 @@ This skill enables AI agents to interact with the [JustLend DAO](https://justlen
 
 ## Prerequisites
 
-- **Node.js** v20+
+- **Node.js 24.22.1** (recommended)
 - **TronGrid API Key** — get from [trongrid.io](https://www.trongrid.io/)
 
 ## Available Tools

@@ -6,16 +6,13 @@ echo ""
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
-    echo "Error: Node.js is not installed. Please install Node.js v20+ first."
+    echo "Error: Node.js is not installed. Please install Node.js 24.22.1 first."
     echo "  https://nodejs.org/"
     exit 1
 fi
 
-NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
-if [ "$NODE_VERSION" -lt 20 ]; then
-    echo "Error: Node.js v20+ is required. Current version: $(node -v)"
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+node "$SCRIPT_DIR/scripts/check-node-version.cjs"
 
 # Install dependencies
 echo "Installing dependencies..."
