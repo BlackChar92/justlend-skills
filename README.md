@@ -105,6 +105,9 @@ justlend-skills/
 
 ## Quick Start
 
+Recommended development baseline: **Node.js 24.22.1**, pinned in `.nvmrc`.
+The supported runtime ranges are listed in `package.json`.
+
 ### 1. Install from GitHub
 
 ```bash
@@ -396,7 +399,7 @@ No funds move — the agent stops at advice because this project is read-only.
 | `429` / slow reads | TronGrid rate limit | back off and retry; upgrade the TronGrid plan for higher throughput |
 | Empty market/account data | key works but network mismatch | check `NETWORK` (`mainnet` vs `nile`) matches the address you're querying |
 | A write skill "does nothing" | full MCP server or signing wallet not installed | install [@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend) and connect a wallet — the bundled server never signs |
-| MCP server won't start | Node < 20, or deps not installed | `node -v` (need v20+); run `npm install` |
+| MCP server won't start | Unpatched/EOL Node, or deps not installed | `node -v` (use the patched releases in `package.json`); run `npm install` |
 | Behaviour changed after update | version / manifest drift | compare installed version with [`CHANGELOG.md`](CHANGELOG.md); re-run `npm install` and restart |
 
 **Logs & version.** The server emits lifecycle/fatal logs to stderr and returns tool failures through the structured error contract above; the CLI prints errors to stderr. Run the CLI command directly to diagnose the offending address/token. Include the project version from `package.json` / `skills/_meta.json` and output `schemaVersion` when filing an issue.
