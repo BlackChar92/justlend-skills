@@ -14,7 +14,7 @@ All notable changes to `justlend-skills`. Format based on Keep a Changelog.
 
 ### CI
 
-- Add pull-request and master-push checks for clean dependency installation, production and full dependency audits, offline tests, the exact Node.js 24.22.1 guard, and script/installer syntax. Audit thresholds are not relaxed.
+- Add master-targeted pull-request and branch-push checks for clean dependency installation, production and full dependency audits, offline tests, the exact Node.js 24.22.1 guard, and script/installer syntax. Push checks work on the fork before upstream master contains its first workflow. Audit thresholds are not relaxed.
 - Exercise the actual bundled stdio process with the installed SDK: nine read-only tools, versioned success/error results, offline market inventory and rejection of unsupported writes. No wallet signing or live API is required.
 
 ## [1.1.1] — 2026-08-19
