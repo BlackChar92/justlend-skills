@@ -106,6 +106,8 @@ justlend-skills/
 ## Quick Start
 
 Recommended development baseline: **Node.js 24.22.1**, pinned in `.nvmrc`.
+
+PRs targeting `master` and pushes to `master` run clean installation, production and full dependency audits, offline tests, and script/installer syntax checks. Run `npm ci`, `npm audit --omit=dev`, `npm audit --audit-level=high`, and `npm test` locally before submitting changes.
 Use `nvm install && nvm use` to select the recommended version.
 
 ### 1. Install from GitHub

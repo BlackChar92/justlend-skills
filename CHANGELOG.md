@@ -3,6 +3,20 @@
 All notable changes to `justlend-skills`. Format based on Keep a Changelog.
 `SPDX-License-Identifier: MIT`. Exact publish timestamps: see `skills/_meta.json`.
 
+
+## [Unreleased]
+
+### Security
+
+- Clear the 2026-10-26 dependency-audit findings: upgrade MCP SDK to `1.32.1` and pin Axios `1.20.0`, fast-uri `3.1.9`, follow-redirects `1.16.1`, qs `6.16.0`, ip-address `10.7.4`, Hono `4.13.13`, body-parser `2.4.0`, brace-expansion `5.0.12`, proxy-addr `2.0.8`, and Zod `4.6.6`.
+- Prefer next-to-latest stable releases where patched (SDK, follow-redirects, qs, ip-address, Hono, Zod). Axios, fast-uri 3.x, body-parser 2.x, brace-expansion 5.x and proxy-addr require their latest fixed release on the existing major line because the preceding release remains affected. Zod has no patched 3.x release; use patched 4.x through the SDK's supported peer range. Release order and advisory ranges checked on 2026-10-26.
+- Add bounded offline regressions for proxy trust, comma-array limits, Zod array preflight, URI parsing and compressed-body decoder cleanup. Tests use synthetic inputs and loopback servers; they do not establish exploitability of every audit alert through the bundled stdio server.
+
+### CI
+
+- Add pull-request and master-push checks for clean dependency installation, production and full dependency audits, offline tests, the exact Node.js 24.22.1 guard, and script/installer syntax. Audit thresholds are not relaxed.
+- Exercise the actual bundled stdio process with the installed SDK: nine read-only tools, versioned success/error results, offline market inventory and rejection of unsupported writes. No wallet signing or live API is required.
+
 ## [1.1.1] — 2026-08-19
 
 ### Added (MCP contract)
