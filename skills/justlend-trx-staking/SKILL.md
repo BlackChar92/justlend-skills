@@ -21,7 +21,8 @@ Liquid staking skill for TRX on JustLend. Stake TRX to receive sTRX tokens, whic
 
 1. **Stake**: Deposit TRX into the sTRX contract → receive sTRX tokens
 2. **Rewards**: Staking rewards accrue to the sTRX/TRX exchange rate (sTRX appreciates over time)
-3. **Unstake**: Burn sTRX to get TRX back (subject to ~14 day unbonding period)
+3. **Unstake**: Burn sTRX to start unbonding. Query the current network's
+   `unfreezeDelayDays` and the round's expiry; do not assume a fixed waiting period.
 
 ## Tools (Full MCP Server)
 

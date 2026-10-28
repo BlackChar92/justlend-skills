@@ -1,7 +1,7 @@
 ---
 name: justlend-lending-v2
 description: >-
-  Isolated-market lending on JustLend V2 (Moolah, a Morpho-style protocol) on
+  Isolated-market lending on JustLend V2 on
   TRON: supply into ERC4626 vaults, supply-collateral / borrow / repay in
   isolated markets, and liquidate. Use when the user references JustLend V2,
   Moolah, isolated markets, or vaults. Writes require the full MCP server plus a
@@ -13,9 +13,9 @@ description: >-
 Before a write, explicitly load [Shared write safety v1](../SAFETY.md) from this
 checkout. The host/agent owns loading and confirmation; if unavailable, remain read-only.
 
-Isolated-market lending skill for **JustLend V2** on TRON — a Morpho-style protocol that
-separates the supply side (curated **ERC4626 vaults**) from the borrow side (permissionless
-**isolated markets**). Each market is a single `(loanToken, collateralToken, oracle, irm, lltv)`
+Isolated-market lending skill for **JustLend V2** on TRON. The protocol
+separates curated **ERC4626 vaults** on the supply side from **isolated markets**
+on the borrow side. Each market is a single `(loanToken, collateralToken, oracle, irm, lltv)`
 pair, so risk is contained per-market rather than pooled like JustLend V1.
 
 > **Naming**: V2's on-chain contracts and MCP tools are named `Moolah` / `moolah_*` (e.g.
@@ -51,7 +51,8 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
   debt above the limit; rounded API values at 1 do not settle the exact boundary.
   Use current on-chain health and a fresh liquidation quote before acting. There is
   **no single account-wide health factor** in V2; risk is per-market.
-- **Liquidation** — a public liquidator can repay an unhealthy position's debt and seize collateral.
+- **Liquidation** — an authorized liquidation route can repay an unhealthy position's debt
+  and seize collateral. An unhealthy position alone does not establish permission to use that route.
 
 ## Tools (Full MCP Server v1.1.0)
 
@@ -119,6 +120,16 @@ authoritative; obtain a fresh `get_moolah_liquidation_quote` for cost estimation
 The quote takes no borrower address and does not check borrower health; a successful
 quote is not proof of eligibility. Do not decide from rounded/stale API values alone.
 
+### Health and liquidation permissions are separate
+
+Check the deployed network and implementation's core caller permission
+(`isLiquidationWhitelist`) and the public-liquidator market/borrower gates
+(`marketWhitelist`, `marketUserWhitelist`) for the exact market and borrower.
+Allowlisting the liquidator in the core contract does not by itself prove that
+the liquidator's own gate is satisfied. A quote does not prove liquidation permission.
+If permissions are unknown, stop and request read-only verification; do not
+substitute caller addresses for the borrower or broaden a whitelist to make the call pass.
+
 ### Approve before write
 TRC20 vault deposits need `approve_moolah_vault`; market collateral supply and
 TRC20 repayment need `approve_moolah_proxy`; liquidation needs
@@ -148,8 +159,9 @@ To *earn*, use a **vault** (`moolah_vault_deposit`). To *borrow*, use a **market
 ### Liquidate an unhealthy position
 1. `get_moolah_pending_liquidations` — find candidates; inclusion is not proof of eligibility.
 2. Verify the target borrower's current on-chain health. If it is healthy or unknown, stop.
-3. `get_moolah_liquidation_quote` — check seize vs repay economics; this is not a borrower-health check.
-4. Separately confirm `approve_liquidator_token`, recheck allowance, then separately confirm `moolah_liquidate`. Verify the receipt and post-state.
+3. Verify the exact route's core caller and public-liquidator market/borrower permissions. If denied or unknown, stop; do not change permissions as a workaround.
+4. `get_moolah_liquidation_quote` — check seize vs repay economics; this is not a borrower-health or permission check.
+5. Separately confirm `approve_liquidator_token`, recheck allowance, then separately confirm `moolah_liquidate`. Verify the receipt and post-state.
 
 ## Examples
 

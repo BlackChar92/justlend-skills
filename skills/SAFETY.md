@@ -1,7 +1,7 @@
 # Shared write safety — v1
 
 Applies to the six write modules shipped with this checkout (rules revision
-2026-10-19). It is not a claim that a particular MCP release or client enforces
+2026-10-28). It is not a claim that a particular MCP release or client enforces
 every rule. The bundled nine-tool server is read-only; writes require the full
 `@justlend/mcp-server-justlend` and a signing wallet.
 
@@ -57,6 +57,29 @@ continue with read-only checks and report the missing dependency; do not write.
   after an uncertain sTRX claim, inspect the tx, TRX balance and claimable amount;
   after an uncertain liquidation, inspect that exact target/market and receipt
   rather than repeating the liquidation because it still appears in an API list.
+
+## Per-module prechecks and unresolved-write evidence
+
+These are acceptance requirements, not proof that a client loaded or enforced
+the rules. For each module, record the loaded skill and this file's revision,
+the exact preview/confirmation, refusal or cancellation, a changed-parameter
+case requiring fresh confirmation, and an unknown-result case with no second
+write. Redact secrets and signed payloads. Static link/content tests verify
+packaging only; they are not independent-client or live-wallet validation.
+
+| Module | Before confirmation | If a submitted write has an unknown outcome |
+| --- | --- | --- |
+| `justlend-lending-v1` | Exact market/asset, balances, allowance, collateral membership, health, pause state and liquidity | Read the original receipt and that market's supply/debt/membership; an unchanged cached balance is not evidence of failure. |
+| `justlend-lending-v2` | Exact vault/market and share/asset units, allowance, liquidity and health; liquidation also needs route-specific caller/market/borrower permissions | Read the original receipt and exact vault shares or borrower/market position. Do not repeat a liquidation because an API still lists the borrower. |
+| `justlend-trx-staking` | Current delay/round expiry, balance and known claimable amount; separate unstake and claim confirmations | Read the original receipt, TRX/sTRX balances, round state and claimable amount. Do not start another unstake to collect a prior round. |
+| `justlend-energy-rental` | Receiver, amount/duration, fresh price, deposit/fees, balance and rental pause/limits | Read the original receipt and matching rental order/state before considering any replacement rental or return. |
+| `justlend-energy-purchase` | Exact quote, payee, receivers, duration, payer/network and absence of unresolved payment risk | Query public history, order state when available and the no-argument risk tool; never sign a second payment while the first is unresolved. |
+| `justlend-governance-v1` | Proposal state/id, vote direction/amount, available versus locked votes, allowance and unlock conditions | Read the original receipt and proposal-specific vote/lock state before another deposit, vote or withdrawal. |
+
+If required prechecks are denied, missing, stale or degraded, stop that write;
+read-only investigation may continue. A receipt without the relevant post-state,
+or post-state without evidence tying it to the original transaction, can leave
+the outcome unresolved. No table row permits automatic replay or permission changes.
 
 ## Credentials and capability boundaries
 

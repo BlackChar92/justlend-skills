@@ -1,6 +1,6 @@
 # JustLend V2 Guide
 
-JustLend V2 is a Morpho-style isolated-lending protocol on TRON. Unlike V1's
+JustLend V2 is an isolated-lending protocol on TRON. Unlike V1's
 single shared pool, V2 splits lending into two layers: **vaults** (the supply side) and **isolated
 markets** (the borrow side). Risk is contained per market instead of pooled across all assets.
 
@@ -37,12 +37,19 @@ A common one-shot path is `supplyCollateralAndBorrow`, which supplies collateral
 single transaction.
 
 ## Liquidation
-Any address can act as a public liquidator when the contract considers the position
-unhealthy. Borrow above the `lltv`-implied limit corresponds to `risk > 1`, not
+An unhealthy position is necessary, but not sufficient, for a liquidation route
+to accept a transaction. Borrow above the `lltv`-implied limit corresponds to `risk > 1`, not
 merely approaching 1. Rounded API values at 1 do not establish the exact boundary:
 use current on-chain `isHealthy` and a fresh liquidation quote. A liquidator repays
 part of the debt and seizes collateral plus an incentive. Pending-liquidation lists
 and quotes are exposed via the MCP server; they do not guarantee transaction success.
+
+Verify the core caller permission (`isLiquidationWhitelist`) and the public-liquidator's
+applicable `marketWhitelist` / `marketUserWhitelist` gates for the exact market and
+borrower, using the deployed network and implementation. Core caller allowlisting
+does not by itself satisfy the liquidator's own gate. A quote does not prove
+liquidation permission. If permissions are unknown, stop and request read-only
+verification. Do not enable a global whitelist or alter protocol permissions as a workaround.
 
 ## Risk Management
 - Monitor each borrow position's `risk` ratio; keep it well below 1 (e.g. under 0.8) to survive
