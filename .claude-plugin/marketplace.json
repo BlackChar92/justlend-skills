@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "justlend-skills",
-  "description": "AI Agent skills for JustLend DAO protocol — interact with JustLend DAO on the TRON network, retrieve market data, check user positions, and execute DeFi operations like supply, borrow, and stake.",
+  "description": "AI Agent skills for JustLend protocol — interact with JustLend on the TRON network, retrieve market data, check user positions, and execute DeFi operations like supply, borrow, and stake.",
   "owner": {
     "name": "justlend-skills"
   },

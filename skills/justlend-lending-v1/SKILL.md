@@ -22,8 +22,8 @@ checkout. The host/agent owns loading and confirmation; if unavailable, remain r
 
 ### 1. Always Check Before Advising
 - Use `get_all_markets` to find the best supply/borrow APYs (includes mining rewards).
-- Use `get_dashboard` for protocol-level stats (total TVL, user count).
-- Use `get_account_summary` or `get_account_data_from_api` to check health factor. If `shortfallUSD > 0`, the user is **at liquidation risk**.
+- Use `get_protocol_summary` for Comptroller configuration, liquidation parameters and market count.
+- Use `get_account_summary` to check health factor. If `shortfallUSD > 0`, the user is **at liquidation risk**.
 - Use `get_trx_balance` or `get_token_balance` to check balances.
 - Use `check_allowance` to verify TRC20 approval status.
 
@@ -32,14 +32,21 @@ checkout. The host/agent owns loading and confirmation; if unavailable, remain r
 | Tool | Description |
 |------|-------------|
 | `get_all_markets` | All markets with supply/borrow APY, mining rewards, and TVL |
-| `get_dashboard` | Protocol overview: total supply, borrow, TVL, user count |
+| `get_protocol_summary` | Comptroller configuration, close factor, liquidation incentive and market count |
 | `get_supported_markets` | Full server's market registry, including active/legacy status |
-| `get_jtoken_details` | Detailed jToken info: interest rate model, reserves, mining rewards |
+| `get_market_data` | Detailed market APY, TVL, utilization and collateral factor; required `market` |
 | `get_account_summary` | Health factor, liquidity, liquidation risk |
-| `get_account_data_from_api` | Comprehensive account data from API (positions, rewards) |
+| `get_mining_rewards` | Current wallet/account mining rewards |
 | `get_trx_balance` | Native TRX balance |
 | `get_token_balance` | TRC20 token balance |
-| `check_allowance` | Check TRC20 approval status for JustLend |
+| `check_allowance` | Check TRC20 approval for required `market`; optional `amount`, `address`, `network` |
+
+The bundled V1 server has a different catalog and parameter schema. For example,
+its allowance input is `asset`, whereas the full server requires `market` (such
+as `jUSDT`). Do not copy bundled examples into a write workflow. Discover
+`tools/list` on the connected full server; supply an explicit `address` for reads
+when no signing wallet is configured. Unknown fields or missing tools mean a
+capability mismatch, not permission to guess an alias.
 
 ## Write workflow (full MCP server)
 

@@ -3,13 +3,13 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![TRON Network](https://img.shields.io/badge/Network-TRON-red)
 ![MCP](https://img.shields.io/badge/MCP-Compatible-blue)
-![JustLend](https://img.shields.io/badge/Protocol-JustLend_DAO-green)
+![JustLend](https://img.shields.io/badge/Protocol-JustLend-green)
 
-AI Agent skills for [JustLend DAO](https://justlend.org) on the TRON network. Provides structured instructions and an MCP server that enables AI agents (Claude Code, Claude Desktop, Cursor, Codex, etc.) to query market data, check account positions, and analyze DeFi lending data.
+AI Agent skills for [JustLend](https://justlend.org) on the TRON network. Provides structured instructions and an MCP server that enables AI agents (Claude Code, Claude Desktop, Cursor, Codex, etc.) to query market data, check account positions, and analyze DeFi lending data.
 
 > **Distribution:** install this project from [GitHub](https://github.com/justlend/justlend-skills); it is not published to the npm registry. The scoped name in `package.json` identifies the project for local tooling only. Do not run `npm install @justlend/justlend-skills`—clone the repository and run `bash install.sh` as described below. The `npm install` command used inside the clone installs this project's dependencies.
 
-**Current version:** `1.1.1` · bundled MCP output contract: `1.0.0`
+**Package metadata version:** `1.1.1` · bundled MCP output contract: `1.0.0`
 
 ## Features
 
@@ -37,7 +37,7 @@ AI Agent skills for [JustLend DAO](https://justlend.org) on the TRON network. Pr
 | **Skills (this repository)** | Agent instruction files (`SKILL.md`) + a bundled read-only MCP server (9 tools) | An agent needs guided read or write workflows; writes route to the full MCP server | Via full MCP only |
 | **Bundled MCP server** (`npm start`) | The 9-tool read-only stdio server shipped here | Same, wired into a client (Claude / Cursor / Codex / OpenCode) | No |
 | **CLI** (`node scripts/justlend_api.mjs`) | One-shot terminal queries | Quick manual checks / scripting reads | No |
-| **Full MCP server** ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)) | 104-tool read + **write** server | You need to *act*: supply/borrow/repay/withdraw, stake, rent or buy energy, vote, liquidate | **Yes** (signing wallet required) |
+| **Full MCP server** ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)) | Full read + **write** server (capability-detect at runtime) | You need to *act*: supply/borrow/repay/withdraw, stake, rent or buy energy, vote, liquidate | **Yes** (signing wallet required) |
 
 ### Skill → dependency matrix
 
@@ -50,8 +50,9 @@ AI Agent skills for [JustLend DAO](https://justlend.org) on the TRON network. Pr
 | `justlend-energy-rental` | — | ✅ | ✅ | ✅ | Yes |
 | `justlend-energy-purchase` | — | ✅ | ✅ | ✅ | Yes |
 | `justlend-governance-v1` | — | ✅ | ✅ | ✅ | Yes |
+| `justlend-risk-alerts` | — | ✅ | — | — | No |
 
-Read-only skills work with just this repository + a TronGrid key. Every write skill routes through the full server and needs a **signing wallet** (agent-wallet or a browser wallet); the bundled server has no signing capability.
+Bundled V1 queries work with just this repository + a TronGrid key. Risk-alert reads instead require the full server and an operator-configured `JUSTLEND_ALERT_API_URL`; no wallet is needed. Every write skill routes through the full server and needs a **signing wallet** (agent-wallet or a browser wallet); the bundled server has no signing capability.
 
 **Graceful degradation.** If the full MCP server or a signing wallet is absent, the read-only skills still work unchanged — the agent can quote rates, read a position, and check allowances, then tell the user exactly what to install (the full server) and connect (a wallet) to act. A write skill invoked without the full server should **stop and report the missing dependency**, never silently no-op or fake a result.
 
@@ -91,7 +92,8 @@ justlend-skills/
 │   ├── justlend-trx-staking/SKILL.md
 │   ├── justlend-energy-rental/SKILL.md
 │   ├── justlend-energy-purchase/SKILL.md
-│   └── justlend-governance-v1/SKILL.md
+│   ├── justlend-governance-v1/SKILL.md
+│   └── justlend-risk-alerts/SKILL.md
 ├── docs/                             # Protocol guides
 │   ├── justlend-guide.md            # Lending concepts & risk management
 │   ├── justlend-v2-guide.md         # V2 isolated-market concepts
@@ -314,6 +316,7 @@ responsibilities. Their revision is separate from package/deployment versions.
 | `justlend-energy-rental` | market reads | rental tools | tx hash + order | quote first; price can move between quote and order |
 | `justlend-energy-purchase` | config / quote / order / public history / payment risk | `buy_energy_direct` | payment tx + order state | confirm exact quote; backend broadcasts; ambiguous results block a second payment |
 | `justlend-governance-v1` | `get_proposal_list`, `get_vote_info` | `approve_jst_for_voting` → `deposit_jst_for_votes` → `cast_vote` → `withdraw_votes_*` | tx hash + vote state | `deposit_jst_for_votes` locks JST as WJST until withdrawal |
+| `justlend-risk-alerts` | explicit-address list / default rules / V2 markets | — | public observations; no email address | errors and nulls stay unknown; no signing workaround |
 
 **Write failure contract:** the host must confirm each write with the user (HITL), preview first, and on any error **re-query state before retrying**. Mutating contract calls are not idempotent. Energy direct purchase is the narrow exception: its service may retry only the **same signed transaction** internally; it must never create a second payment silently.
 
@@ -376,6 +379,7 @@ No funds move — the agent stops at advice because this project is read-only.
 | `justlend-energy-rental` | write, **spends TRX** | no (consumed) | rental fee | yes |
 | `justlend-energy-purchase` | write, **signs TRX payment** | no after backend broadcast | quoted payment + possible activation fee | yes, exact quote |
 | `justlend-governance-v1` | write | vote reclaimable after proposal ends | **JST locked as WJST** | yes |
+| `justlend-risk-alerts` | read-only | n/a | no signing or transaction fee | no |
 
 ### If an agent misfires (recovery)
 
@@ -405,6 +409,32 @@ No funds move — the agent stops at advice because this project is read-only.
 | Behaviour changed after update | version / manifest drift | compare installed version with [`CHANGELOG.md`](CHANGELOG.md); re-run `npm install` and restart |
 
 **Logs & version.** The server emits lifecycle/fatal logs to stderr and returns tool failures through the structured error contract above; the CLI prints errors to stderr. Run the CLI command directly to diagnose the offending address/token. Include the project version from `package.json` / `skills/_meta.json` and output `schemaVersion` when filing an issue.
+
+
+## Capability snapshot and release boundaries
+
+The [full-server snapshot](tests/fixtures/full-mcp-capabilities.json) is a **source snapshot, not a published release**.
+It records 107 tools from the exact MCP commit in `sourceCommit`, including three
+read-only risk-alert tools. The bundled server still has **nine V1 read tools**.
+Use the connected server's `tools/list` and schemas before following any module;
+a matching version string alone is insufficient. Offline tests cross-check skill
+tool tables and alert inputs/read annotations, not live-wallet execution.
+
+Maintainers can regenerate the fixture from a clean, committed and built MCP
+checkout with `node scripts/snapshot-full-mcp.mjs /absolute/path/to/mcp-server-justlend`.
+Review the resulting diff before committing it. The fixture does not require
+credentials and the script makes no API requests or signing calls.
+
+The historical `latest`/`history` timestamps in `skills/_meta.json` are retained
+for compatibility and explicitly marked unverified in `development`; these
+changes do not bump a version, set a future publication date, or publish npm.
+Only a separately completed release may establish new release metadata.
+
+Risk-alert usage is in [the read-only module](skills/justlend-risk-alerts/SKILL.md).
+Writes and email operations are deferred until the backend confirms headless
+session identity. Staking delay/claim rules, energy same-payment recovery, and
+V2 health/permission/quote separation remain mandatory; they are not bypassed by
+the presence of a new read capability.
 
 ## License
 

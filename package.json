@@ -2,7 +2,7 @@
   "name": "@justlend/justlend-skills",
   "version": "1.1.1",
   "private": true,
-  "description": "AI Agent skills for JustLend DAO on TRON \u2014 structured instructions and MCP tools for V1 pooled lending, V2 isolated lending, staking, energy rental/direct purchase, and governance operations.",
+  "description": "AI Agent skills for JustLend on TRON \u2014 structured instructions and MCP tools for V1 pooled lending, V2 isolated lending, staking, energy rental/direct purchase, and governance operations.",
   "main": "scripts/mcp_server.mjs",
   "type": "module",
   "scripts": {
@@ -56,7 +56,7 @@
     "fast-uri": "3.1.9",
     "form-data": "4.0.6",
     "follow-redirects": "1.16.1",
-    "qs": "6.16.0",
+    "qs": "6.16.1",
     "ip-address": "10.7.4",
     "hono": "4.13.13",
     "@hono/node-server": "2.0.11",

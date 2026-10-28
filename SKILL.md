@@ -1,7 +1,7 @@
 ---
 name: justlend-dao
 description: >-
-  Read-only query surface for JustLend DAO lending on TRON — real-time market
+  Read-only query surface for JustLend lending on TRON — real-time market
   data (APY/TVL/rates), account positions and health factor, jToken details,
   TRC20 balances, and allowances, via the bundled 9-tool MCP server. Use when
   the user asks about JustLend markets, their lending position/health, or TRON
@@ -10,9 +10,9 @@ description: >-
   @justlend/mcp-server-justlend. Not for non-TRON chains or non-JustLend protocols.
 ---
 
-# JustLend DAO — AI Agent Skill
+# JustLend — AI Agent Skill
 
-This skill enables AI agents to interact with the [JustLend DAO](https://justlend.org) lending protocol on the TRON blockchain. Query real-time market data, check account positions, and analyze lending data via MCP tools.
+This skill enables AI agents to interact with the [JustLend](https://justlend.org) lending protocol on the TRON blockchain. Query real-time market data, check account positions, and analyze lending data via MCP tools.
 
 ## Prerequisites
 
@@ -87,3 +87,5 @@ Prefer `structuredContent`: successes return `{ schemaVersion: "1.0.0", tool, re
 - This is a **read-only** skill — no transaction signing or write operations
 - Only requires a TronGrid API key for blockchain read access
 - Direct energy purchase uses `justlend-energy-purchase` with the full MCP server; it is not provided by this bundled read-only MCP.
+
+Risk-alert queries use [justlend-risk-alerts](skills/justlend-risk-alerts/SKILL.md) and the full server, not these nine bundled tools. Require runtime capability detection and an explicit trusted endpoint; no signing or email changes are supported.

@@ -23,10 +23,11 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
 > skill refers to the product as **JustLend V2** throughout and uses the `moolah_*` names only
 > where they match the actual tool/contract surface.
 
-> **Note**: This skill requires the full MCP server v1.1.0+
-> ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)), which added
-> the 30 V2 tools and 4 AI prompts below. The lite bundled server (read-only V1) does not
-> include them.
+> **Note**: This skill requires the full MCP server
+> ([@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend)),
+> with the 30 V2 tools and 4 AI prompts below. Detect them with `tools/list`;
+> do not infer availability from a version string. The bundled V1 server does
+> not include them.
 
 ## V1 vs V2 — when to use which
 
@@ -103,7 +104,7 @@ pair, so risk is contained per-market rather than pooled like JustLend V1.
 | `get_moolah_vault_mining_apy` | Single vault's V2 mining APY (USDD/TRX split + total) | No |
 | `get_moolah_mining_resolver` | All mining-enabled vaults → their USDD/TRX APY split | No |
 | `get_moolah_mining_accruing` | A user's accruing + settling mining rewards across vaults | No |
-| `get_moolah_pending_mining_periods` | A user's claimable (settled, merkle-published) airdrop rounds | No |
+| `get_moolah_pending_mining_periods` | Backend-reported mining rounds; verify published root and on-chain status before claiming | No |
 | `claim_moolah_mining_period` | Claim a single settled mining airdrop round via `multiClaim()` | **Yes** |
 
 > AI prompts (full MCP server): `moolah_supply`, `moolah_borrow`, `moolah_liquidate`,
@@ -171,3 +172,25 @@ To *earn*, use a **vault** (`moolah_vault_deposit`). To *borrow*, use a **market
 - "Check my JustLend V2 positions — is any market close to liquidation?"
 - "Show me the pending liquidations on JustLend V2 and the quote to liquidate the riskiest one."
 - "How much energy will a V2 supply-collateral-and-borrow cost?"
+
+## Mining rewards: state and recovery
+
+Keep accruing, settling and settled rewards separate. A backend payload is not
+on-chain claimability. On mainnet, use `get_moolah_mining_accruing` for current
+accrual and `get_moolah_pending_mining_periods` for backend-reported periods.
+Before `claim_moolah_mining_period`, bind the explicit owner, period, token/amount
+and configured distributor; require a published root, valid proof and a known
+unclaimed on-chain index. Missing root, mismatched proof, unavailable state or an
+already-claimed index must stop signing, not become a zero/default proof.
+Confirm that exact claim separately and verify its receipt and claimed state.
+On timeout inspect the original receipt and index before considering another call.
+
+For CLI users, `mining claim-info` and its deprecated `mining claim` alias only
+inspect payload status; neither signs or proves claimability. Do not treat the
+legacy command name as a transaction. SUN pool registry membership likewise does
+not prove a currently active V1 or V2 reward campaign.
+
+The V2 Utils SDK's optional `getLiquidationPermissionDiagnostics` is a JavaScript
+helper, **not an MCP tool**. It reports independent flags and unknown reads, not
+`canLiquidate: true`; deployed gate semantics, health and quote still need
+separate verification. Never substitute it for execution consent.

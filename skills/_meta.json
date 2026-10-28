@@ -1,22 +1,41 @@
 {
   "owner": "justlend",
   "slug": "justlend-skills",
-  "displayName": "JustLend DAO Skills",
+  "displayName": "JustLend Skills",
   "latest": {
     "version": "1.1.1",
     "publishedAt": 1787129972000,
     "commit": ""
   },
   "history": [
-    { "version": "1.1.0", "publishedAt": 1750118400000, "commit": "" },
-    { "version": "1.0.0", "publishedAt": 1741622400000 }
+    {
+      "version": "1.1.0",
+      "publishedAt": 1750118400000,
+      "commit": ""
+    },
+    {
+      "version": "1.0.0",
+      "publishedAt": 1741622400000
+    }
   ],
   "keywords": [
-    "tron", "trx", "trc20", "defi", "justlend", "lending",
-    "isolated-lending", "vault", "erc4626", "v2",
-    "staking", "energy", "governance", "mcp", "ai-agent"
+    "tron",
+    "trx",
+    "trc20",
+    "defi",
+    "justlend",
+    "lending",
+    "isolated-lending",
+    "vault",
+    "erc4626",
+    "v2",
+    "staking",
+    "energy",
+    "governance",
+    "mcp",
+    "ai-agent"
   ],
-  "description": "AI Agent skills for JustLend DAO — query market data, manage lending positions, and execute DeFi operations on the TRON blockchain.",
+  "description": "AI Agent skills for JustLend — query market data, manage lending positions, and execute DeFi operations on the TRON blockchain.",
   "skills": [
     {
       "id": "justlend-lending-v1",
@@ -47,6 +66,16 @@
       "id": "justlend-governance-v1",
       "name": "DAO Governance",
       "description": "Participate in JustLend DAO proposal voting"
+    },
+    {
+      "id": "justlend-risk-alerts",
+      "name": "Risk Alerts (Read Only)",
+      "description": "Read subscriptions, default thresholds and V2 alert markets; no signatures, sessions or email changes"
     }
-  ]
+  ],
+  "development": {
+    "published": false,
+    "releaseMetadataStatus": "Existing latest/history timestamps are historical and unverified; they do not publish the capabilities in this checkout.",
+    "capabilitySnapshot": "../tests/fixtures/full-mcp-capabilities.json"
+  }
 }

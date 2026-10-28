@@ -109,3 +109,18 @@ for (const [encoding, mode] of [["gzip", "valid"], ["gzip", "trailing"], ["defla
     assert.deepEqual(JSON.parse(output), { status: 200, body: '{"a":1}', alive: "alive" });
   });
 }
+
+// GHSA-6pq8-jhm2-2vcw: hostile array-element coercion must not crash comma serialization.
+for (const encodeValuesOnly of [false, true]) {
+  for (const [label, payload] of [
+    ['JSON own non-callable toString', JSON.parse('{"a":[{"toString":"x"}]}')],
+    ['query own non-callable toString', qs.parse('a[0][toString]=x', { allowPrototypes: true })],
+    ['null-prototype element', qs.parse('a[][b]=c', { plainObjects: true })]
+  ]) {
+    test(`comma stringify tolerates ${label}, encodeValuesOnly=${encodeValuesOnly}`, () => {
+      assert.doesNotThrow(() => qs.stringify(payload, { arrayFormat: 'comma', encodeValuesOnly }));
+      assert.equal(qs.stringify({ a: [1, 2] }, { arrayFormat: 'comma', encodeValuesOnly }),
+        encodeValuesOnly ? 'a=1,2' : 'a=1%2C2');
+    });
+  }
+}

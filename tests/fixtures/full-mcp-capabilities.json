@@ -1,0 +1,1298 @@
+{
+  "sourceRepository": "https://github.com/justlend/mcp-server-justlend",
+  "sourceCommit": "819f29665c11b96f321205654145a57b6bbca38a",
+  "publicationClaim": false,
+  "note": "Offline registry snapshot only; connected tools/list remains authoritative.",
+  "tools": [
+    {
+      "name": "get_wallet_address",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "list_wallets",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "set_active_wallet",
+      "inputs": [
+        "walletId"
+      ],
+      "required": [
+        "walletId"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "connect_browser_wallet",
+      "inputs": [
+        "address"
+      ],
+      "required": [],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "set_wallet_mode",
+      "inputs": [
+        "mode"
+      ],
+      "required": [
+        "mode"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_wallet_mode",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "set_network",
+      "inputs": [
+        "network"
+      ],
+      "required": [
+        "network"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_network",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "transfer_trx",
+      "inputs": [
+        "to",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "to",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "transfer_trc20",
+      "inputs": [
+        "to",
+        "amount",
+        "token",
+        "tokenAddress",
+        "network"
+      ],
+      "required": [
+        "to",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_supported_networks",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_supported_markets",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_market_data",
+      "inputs": [
+        "market",
+        "network"
+      ],
+      "required": [
+        "market"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_all_markets",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_protocol_summary",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_account_summary",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "check_allowance",
+      "inputs": [
+        "market",
+        "amount",
+        "address",
+        "network"
+      ],
+      "required": [
+        "market"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_trx_balance",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_token_balance",
+      "inputs": [
+        "token",
+        "tokenAddress",
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_wallet_balances",
+      "inputs": [
+        "tokens",
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_mining_rewards",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_usdd_mining_config",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_wbtc_mining_config",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "supply",
+      "inputs": [
+        "market",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "market",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "withdraw",
+      "inputs": [
+        "market",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "market",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "withdraw_all",
+      "inputs": [
+        "market",
+        "network"
+      ],
+      "required": [
+        "market"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "borrow",
+      "inputs": [
+        "market",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "market",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "repay",
+      "inputs": [
+        "market",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "market",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "enter_market",
+      "inputs": [
+        "market",
+        "network"
+      ],
+      "required": [
+        "market"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "exit_market",
+      "inputs": [
+        "market",
+        "network"
+      ],
+      "required": [
+        "market"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "approve_underlying",
+      "inputs": [
+        "market",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "market",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "claim_rewards",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "estimate_lending_energy",
+      "inputs": [
+        "operation",
+        "market",
+        "amount",
+        "spender",
+        "address",
+        "network"
+      ],
+      "required": [
+        "operation",
+        "market"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_proposal_list",
+      "inputs": [
+        "network",
+        "limit"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_user_vote_status",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_vote_info",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_locked_votes",
+      "inputs": [
+        "proposalId",
+        "address",
+        "network"
+      ],
+      "required": [
+        "proposalId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "check_jst_allowance_for_voting",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "approve_jst_for_voting",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "deposit_jst_for_votes",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "withdraw_votes_to_jst",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "cast_vote",
+      "inputs": [
+        "proposalId",
+        "support",
+        "votes",
+        "network"
+      ],
+      "required": [
+        "proposalId",
+        "support",
+        "votes"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "withdraw_votes_from_proposal",
+      "inputs": [
+        "proposalId",
+        "network"
+      ],
+      "required": [
+        "proposalId"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_energy_purchase_config",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "quote_energy_purchase",
+      "inputs": [
+        "receiverAddresses",
+        "energyPerReceiver",
+        "duration"
+      ],
+      "required": [
+        "receiverAddresses",
+        "energyPerReceiver",
+        "duration"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_purchase_order",
+      "inputs": [
+        "orderId",
+        "orderToken"
+      ],
+      "required": [
+        "orderId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_purchase_history",
+      "inputs": [
+        "address",
+        "page",
+        "size"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_payment_risk",
+      "inputs": [],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "buy_energy_direct",
+      "inputs": [
+        "receiverAddresses",
+        "energyPerReceiver",
+        "duration",
+        "expectedAmountSun",
+        "expectedPayAddress",
+        "confirmPayment",
+        "network"
+      ],
+      "required": [
+        "receiverAddresses",
+        "energyPerReceiver",
+        "duration",
+        "expectedAmountSun",
+        "expectedPayAddress",
+        "confirmPayment"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_energy_rental_dashboard",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_rental_params",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "calculate_energy_rental_price",
+      "inputs": [
+        "energyAmount",
+        "durationHours",
+        "receiverAddress",
+        "network"
+      ],
+      "required": [
+        "energyAmount"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_rental_rate",
+      "inputs": [
+        "trxAmount",
+        "network"
+      ],
+      "required": [
+        "trxAmount"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_user_energy_rental_orders",
+      "inputs": [
+        "address",
+        "type",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_rent_info",
+      "inputs": [
+        "renterAddress",
+        "receiverAddress",
+        "network"
+      ],
+      "required": [
+        "receiverAddress"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_return_rental_info",
+      "inputs": [
+        "renterAddress",
+        "receiverAddress",
+        "network"
+      ],
+      "required": [
+        "receiverAddress"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "rent_energy",
+      "inputs": [
+        "receiverAddress",
+        "energyAmount",
+        "durationHours",
+        "network"
+      ],
+      "required": [
+        "receiverAddress",
+        "energyAmount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "return_energy_rental",
+      "inputs": [
+        "counterpartyAddress",
+        "endOrderType",
+        "network"
+      ],
+      "required": [
+        "counterpartyAddress"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_strx_dashboard",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_strx_account",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_strx_balance",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "check_strx_withdrawal_eligibility",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "stake_trx_to_strx",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "unstake_strx",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "claim_strx_rewards",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "wrap_trx",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "unwrap_trx",
+      "inputs": [
+        "amount",
+        "network"
+      ],
+      "required": [
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_moolah_vaults",
+      "inputs": [
+        "depositToken",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_vault",
+      "inputs": [
+        "vaultSymbol",
+        "address",
+        "network"
+      ],
+      "required": [
+        "vaultSymbol"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "approve_moolah_vault",
+      "inputs": [
+        "vaultSymbol",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "vaultSymbol",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "moolah_vault_deposit",
+      "inputs": [
+        "vaultSymbol",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "vaultSymbol",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "moolah_vault_withdraw",
+      "inputs": [
+        "vaultSymbol",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "vaultSymbol",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "moolah_vault_redeem",
+      "inputs": [
+        "vaultSymbol",
+        "shares",
+        "network"
+      ],
+      "required": [
+        "vaultSymbol",
+        "shares"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_moolah_markets",
+      "inputs": [
+        "depositToken",
+        "collateralToken",
+        "pageSize",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_market",
+      "inputs": [
+        "marketId",
+        "network"
+      ],
+      "required": [
+        "marketId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_user_position",
+      "inputs": [
+        "marketId",
+        "address",
+        "network"
+      ],
+      "required": [
+        "marketId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "approve_moolah_proxy",
+      "inputs": [
+        "tokenAddress",
+        "tokenSymbol",
+        "tokenDecimals",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "tokenAddress",
+        "tokenSymbol",
+        "tokenDecimals",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "moolah_supply_collateral",
+      "inputs": [
+        "marketId",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "marketId",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "moolah_withdraw_collateral",
+      "inputs": [
+        "marketId",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "marketId",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "moolah_borrow",
+      "inputs": [
+        "marketId",
+        "collateralAmount",
+        "borrowAmount",
+        "network"
+      ],
+      "required": [
+        "marketId"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "moolah_repay",
+      "inputs": [
+        "marketId",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "marketId",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_moolah_pending_liquidations",
+      "inputs": [
+        "minRiskLevel",
+        "maxRiskLevel",
+        "debtToken",
+        "collateralToken",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_liquidation_quote",
+      "inputs": [
+        "marketId",
+        "seizedAssets",
+        "repaidShares",
+        "network"
+      ],
+      "required": [
+        "marketId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_liquidation_records",
+      "inputs": [
+        "type",
+        "debtToken",
+        "collateralToken",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "moolah_liquidate",
+      "inputs": [
+        "marketId",
+        "borrower",
+        "seizedAssets",
+        "repaidShares",
+        "network"
+      ],
+      "required": [
+        "marketId",
+        "borrower"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "approve_liquidator_token",
+      "inputs": [
+        "tokenAddress",
+        "tokenSymbol",
+        "tokenDecimals",
+        "amount",
+        "network"
+      ],
+      "required": [
+        "tokenAddress",
+        "tokenSymbol",
+        "tokenDecimals",
+        "amount"
+      ],
+      "readOnlyHint": false,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_dashboard",
+      "inputs": [
+        "address",
+        "depositToken",
+        "collateralToken",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_history",
+      "inputs": [
+        "address",
+        "timeFilter",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_records",
+      "inputs": [
+        "address",
+        "pageNo",
+        "pageSize",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_vault_history",
+      "inputs": [
+        "vaultAddress",
+        "network"
+      ],
+      "required": [
+        "vaultAddress"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "estimate_moolah_energy",
+      "inputs": [
+        "operation",
+        "isTRX",
+        "address",
+        "network"
+      ],
+      "required": [
+        "operation"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_market_history",
+      "inputs": [
+        "marketId",
+        "network"
+      ],
+      "required": [
+        "marketId"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_vault_mining_apy",
+      "inputs": [
+        "vaultAddress",
+        "network"
+      ],
+      "required": [
+        "vaultAddress"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_mining_resolver",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_mining_accruing",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_moolah_pending_mining_periods",
+      "inputs": [
+        "address",
+        "includeClaimed",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "claim_moolah_mining_period",
+      "inputs": [
+        "periodKey",
+        "merkleIndex",
+        "index",
+        "amounts",
+        "proof",
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_lending_records",
+      "inputs": [
+        "address",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_strx_records",
+      "inputs": [
+        "address",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_vote_records",
+      "inputs": [
+        "address",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_energy_rental_records",
+      "inputs": [
+        "address",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_claimable_rewards",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "claim_v1_mining_period",
+      "inputs": [
+        "key",
+        "merkleIndex",
+        "index",
+        "amount",
+        "proof",
+        "tokenAddress",
+        "tokenSymbol",
+        "distributor",
+        "selector",
+        "address",
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": false,
+      "destructiveHint": true
+    },
+    {
+      "name": "get_liquidation_records",
+      "inputs": [
+        "address",
+        "page",
+        "pageSize",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_risk_alerts",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_risk_alert_rules",
+      "inputs": [
+        "network"
+      ],
+      "required": [],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_risk_alert_markets",
+      "inputs": [
+        "address",
+        "network"
+      ],
+      "required": [
+        "address"
+      ],
+      "readOnlyHint": true,
+      "destructiveHint": false
+    }
+  ]
+}

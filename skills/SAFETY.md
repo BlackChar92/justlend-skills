@@ -2,7 +2,7 @@
 
 Applies to the six write modules shipped with this checkout (rules revision
 2026-10-28). It is not a claim that a particular MCP release or client enforces
-every rule. The bundled nine-tool server is read-only; writes require the full
+every rule. The read-only risk-alert module is also listed below to make its no-write boundary explicit. The bundled nine-tool server is read-only; writes require the full
 `@justlend/mcp-server-justlend` and a signing wallet.
 
 ## Loading responsibility
@@ -75,6 +75,7 @@ packaging only; they are not independent-client or live-wallet validation.
 | `justlend-energy-rental` | Receiver, amount/duration, fresh price, deposit/fees, balance and rental pause/limits | Read the original receipt and matching rental order/state before considering any replacement rental or return. |
 | `justlend-energy-purchase` | Exact quote, payee, receivers, duration, payer/network and absence of unresolved payment risk | Query public history, order state when available and the no-argument risk tool; never sign a second payment while the first is unresolved. |
 | `justlend-governance-v1` | Proposal state/id, vote direction/amount, available versus locked votes, allowance and unlock conditions | Read the original receipt and proposal-specific vote/lock state before another deposit, vote or withdrawal. |
+| `justlend-risk-alerts` | Mainnet, explicit address, trusted configured endpoint, three available read tools | No writes exist in this module. Unknown results remain unknown; never establish a session or sign as a recovery workaround. |
 
 If required prechecks are denied, missing, stale or degraded, stop that write;
 read-only investigation may continue. A receipt without the relevant post-state,
