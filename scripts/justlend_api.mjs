@@ -29,6 +29,15 @@ const MARKETS = {
   WIN:  { symbol: 'WIN',  underlying: 'TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7', jToken: 'TRg6MnpsFXc82ymUPgf5qbj59ibxiEDWvv', decimals: 6,  isNative: false },
 };
 
+function getMarketShortcut(symbol) {
+  const market = typeof symbol === 'string' && MARKETS[symbol.toUpperCase()];
+  if (!market) {
+    const label = typeof symbol === 'string' ? symbol : 'expected a bundled asset shortcut';
+    throw Object.assign(new Error(`Unknown asset: ${label}`), { code: 'INVALID_ASSET' });
+  }
+  return market;
+}
+
 const MANTISSA = 1e18;
 
 // Minimal Comptroller ABI for getAccountLiquidity
@@ -49,6 +58,10 @@ const COMPTROLLER_ABI = [
 
 class JustLendAPI {
   constructor() {
+    const network = (process.env.NETWORK ?? '').trim().toLowerCase() || 'mainnet';
+    if (network !== 'mainnet') {
+      throw new Error('Unsupported NETWORK: bundled read-only queries support mainnet only.');
+    }
     this.tronWeb = new TronWeb({
       fullHost: 'https://api.trongrid.io',
       headers: { 'TRON-PRO-API-KEY': process.env.TRONGRID_API_KEY },
@@ -172,8 +185,7 @@ class JustLendAPI {
 
   // Check TRC20 allowance for a jToken market
   async checkAllowance(address, assetSymbol) {
-    const market = MARKETS[assetSymbol.toUpperCase()];
-    if (!market) throw new Error(`Unknown asset: ${assetSymbol}`);
+    const market = getMarketShortcut(assetSymbol);
     if (market.isNative) return { asset: assetSymbol, allowance: 'Infinity', needsApproval: false, note: 'Native TRX does not require approval' };
 
     const result = await this.tronWeb.transactionBuilder.triggerConstantContract(
@@ -206,8 +218,8 @@ class JustLendAPI {
   }
 
   async getTokenBalance(address, tokenSymbol) {
-    const market = MARKETS[tokenSymbol.toUpperCase()];
-    if (!market || market.isNative) return this.getTrxBalance(address);
+    const market = getMarketShortcut(tokenSymbol);
+    if (market.isNative) return this.getTrxBalance(address);
 
     const result = await this.tronWeb.transactionBuilder.triggerConstantContract(
       market.underlying,
@@ -233,10 +245,17 @@ class JustLendAPI {
       );
 
       const hexResults = result.constant_result?.[0];
-      if (!hexResults) throw new Error('Failed to read comptroller');
+      if (typeof hexResults !== 'string' || hexResults.length !== 192 || !/^[0-9a-fA-F]+$/.test(hexResults)) {
+        throw new Error('Failed to decode Comptroller response');
+      }
 
       // Returns (uint256 error, uint256 liquidity, uint256 shortfall) — 3x 32-byte words
       const errorCode = BigInt('0x' + hexResults.substring(0, 64));
+      if (errorCode !== 0n) {
+        throw Object.assign(new Error(`Comptroller query failed with error code ${errorCode}`), {
+          code: 'COMPTROLLER_QUERY_FAILED',
+        });
+      }
       const liquidity = BigInt('0x' + hexResults.substring(64, 128));
       const shortfall = BigInt('0x' + hexResults.substring(128, 192));
 
@@ -247,8 +266,8 @@ class JustLendAPI {
         address,
         liquidityUSD: liquidityUSD.toFixed(2),
         shortfallUSD: shortfallUSD.toFixed(2),
-        isLiquidatable: shortfallUSD > 0,
-        status: shortfallUSD > 0 ? "AT RISK" : "SAFE"
+        isLiquidatable: shortfall > 0n,
+        status: shortfall > 0n ? "AT RISK" : "SAFE"
       };
     } catch (error) {
       throw error;

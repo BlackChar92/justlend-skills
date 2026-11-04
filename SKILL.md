@@ -2,7 +2,7 @@
 name: justlend-dao
 description: >-
   Read-only query surface for JustLend lending on TRON — real-time market
-  data (APY/TVL/rates), account positions and health factor, jToken details,
+  data (APY/TVL/rates), account liquidity and shortfall, jToken details,
   TRC20 balances, and allowances, via the bundled 9-tool MCP server. Use when
   the user asks about JustLend markets, their lending position/health, or TRON
   lending data. For write actions (supply/borrow/repay/withdraw, stake, vote,
@@ -14,6 +14,10 @@ description: >-
 
 This skill enables AI agents to interact with the [JustLend](https://justlend.org) lending protocol on the TRON blockchain. Query real-time market data, check account positions, and analyze lending data via MCP tools.
 
+The bundled MCP server and CLI are **mainnet-only**. `NETWORK` defaults to
+`mainnet`; non-mainnet values are rejected, not silently redirected. Use the
+full MCP server's supported network configuration for testnet workflows.
+
 ## Prerequisites
 
 - **Node.js 24.22.1** (recommended)
@@ -24,7 +28,7 @@ This skill enables AI agents to interact with the [JustLend](https://justlend.or
 | Tool | Inputs | Description |
 |------|--------|-------------|
 | `get_all_markets` | — | All JustLend markets with supply/borrow APY, mining APY, and TVL |
-| `get_account_summary` | `address` | Health factor, liquidity, and liquidation risk |
+| `get_account_summary` | `address` | `liquidityUSD`, `shortfallUSD`, `isLiquidatable`, `status` |
 | `get_trx_balance` | `address` | Native TRX balance |
 | `get_token_balance` | `address`, `token` | TRC20 token balance (e.g., USDT, USDD) |
 | `get_dashboard` | — | Protocol overview: total supply, total borrow, TVL, user count |
@@ -35,8 +39,13 @@ This skill enables AI agents to interact with the [JustLend](https://justlend.or
 
 ## Critical Rules
 
-### Health Factor Check
-Always call `get_account_summary` before advising a user about their position. If `shortfallUSD > 0`, the position is **at liquidation risk**.
+### Account Liquidity Check
+Always call `get_account_summary` before advising a user about their position.
+It does not compute `healthFactor`, supply/borrow totals or positions. Use
+`status` and `isLiquidatable` for the contract's current shortfall signal;
+the two-decimal USD display can round a small positive shortfall to `0.00`.
+A failed query leaves risk unknown, never SAFE. A successful `SAFE` result
+only means no current Comptroller shortfall, not a guarantee about a new borrow.
 
 ## Typical Workflows
 
@@ -45,7 +54,7 @@ Always call `get_account_summary` before advising a user about their position. I
 2. Compare `totalSupplyAPY` (includes mining rewards) across markets
 
 ### Analyze Account Position
-1. `get_account_summary` — check health factor and liquidity
+1. `get_account_summary` — check current liquidity, shortfall and query success
 2. `get_account_data_from_api` — get detailed position data
 3. `get_token_balance` — check specific token balances
 

@@ -9,12 +9,12 @@ const tool = (definition) => ({
 export const MCP_TOOLS = [
   tool({
     name: "get_all_markets",
-    description: "Overview of all live JustLend markets including supply/borrow APY and TVL.",
+    description: "Overview of live mainnet markets: symbol, jToken, supplyAPY, totalSupplyAPY, borrowAPY, formatted tvlUSD and optional mining/staking APY. Does not return market supply/borrow totals.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   }),
   tool({
     name: "get_account_summary",
-    description: "Get account health factor, liquidity, and liquidation risk status.",
+    description: "Get mainnet account liquidityUSD, shortfallUSD, isLiquidatable and status. Nonzero Comptroller error codes fail the query.",
     inputSchema: {
       type: "object",
       properties: {
@@ -38,7 +38,7 @@ export const MCP_TOOLS = [
   }),
   tool({
     name: "get_token_balance",
-    description: "Check a bundled TRC20 market shortcut balance (for example USDT or USDD).",
+    description: "Check a recognized mainnet TRX/TRC20 shortcut balance (for example TRX, USDT or USDD). Unknown symbols fail as invalid_input.",
     inputSchema: {
       type: "object",
       properties: {

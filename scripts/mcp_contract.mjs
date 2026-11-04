@@ -50,6 +50,26 @@ export function classifyToolError(error) {
   const message = error instanceof Error ? error.message : String(error ?? "Unknown error");
   const normalized = message.toLowerCase();
 
+  // Input values that resemble HTTP errors must not select a retryable class.
+  if (error?.code === "INVALID_ASSET") {
+    return {
+      error: message,
+      errorCode: "invalid_input",
+      retryable: false,
+      hint: "Correct the tool name or arguments before retrying.",
+    };
+  }
+
+  // Contract codes are uint256 values, not HTTP statuses embedded in text.
+  if (error?.code === "COMPTROLLER_QUERY_FAILED") {
+    return {
+      error: message,
+      errorCode: "internal",
+      retryable: false,
+      hint: "Treat account risk as unknown; inspect the contract/RPC failure before trying again.",
+    };
+  }
+
   if (/429|rate.?limit|too many requests/.test(normalized)) {
     return {
       error: message,

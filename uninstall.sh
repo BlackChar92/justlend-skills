@@ -13,7 +13,7 @@ cat <<'NOTE'
 Manual cleanup (this script does not edit files it did not create):
   • Remove the "justlend" MCP entry from your client config, e.g.:
       - Claude Desktop: ~/Library/Application Support/Claude/claude_desktop_config.json
-      - Claude Code:    .claude/settings.local.json
+      - Claude Code:    .mcp.json (project), ~/.claude.json (local/user scope)
       - Cursor:         .cursor/mcp.json
       - Codex:          ~/.codex/  (see .codex/INSTALL.md)
       - OpenCode:       .opencode/ plugin entry

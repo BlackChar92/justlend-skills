@@ -15,7 +15,7 @@ AI Agent skills for [JustLend](https://justlend.org) on the TRON network. Provid
 
 - **Market Data**: Real-time APY (including mining rewards), TVL, and utilization for all JustLend markets
 - **Protocol Dashboard**: Total supply, borrow, TVL, user count across the protocol
-- **Account Analysis**: Health factor monitoring, liquidation risk assessment, balance queries
+- **Account Analysis**: Comptroller liquidity/shortfall, current liquidation-risk status, balance queries
 - **Token Allowances**: Check TRC20 approval status for JustLend contracts
 - **Energy Direct Purchase Workflow**: Quote, explicitly confirm, submit, track, and recover backend-broadcast energy payments through the full MCP server
 
@@ -136,9 +136,18 @@ Edit `.env`:
 # Required — get from https://www.trongrid.io/
 TRONGRID_API_KEY=your_trongrid_api_key
 
-# Network: mainnet (default) or nile (testnet)
+# Mainnet-only bundled queries; non-mainnet NETWORK values are rejected.
 NETWORK=mainnet
 ```
+
+The bundled MCP server and CLI are **mainnet-only**: RPC, contracts and APIs
+use mainnet. An unset or blank `NETWORK` selects `mainnet`; any other network
+(including `nile`) is rejected at startup. For testnets, use the full MCP
+server's supported network configuration and verify its RPC/contracts/API
+selection separately. This package's `.env` cannot switch the full server.
+
+For development, `npm run dev` uses the required Node runtime's native
+`--watch` mode to restart when imported source files change; no nodemon is needed.
 
 ### 3. Run
 
@@ -228,7 +237,10 @@ Add to `.cursor/mcp.json`:
 
 ### Claude Code
 
-Add to `.claude/settings.local.json`:
+Add the server to the project-root `.mcp.json` (see the
+[official scope reference](https://code.claude.com/docs/en/mcp#project-scope)).
+Export `TRONGRID_API_KEY` in the environment that launches Claude Code; do not
+commit the real key with a shared project configuration:
 
 ```json
 {
@@ -237,7 +249,7 @@ Add to `.claude/settings.local.json`:
       "command": "node",
       "args": ["/ABSOLUTE_PATH_TO/justlend-skills/scripts/mcp_server.mjs"],
       "env": {
-        "TRONGRID_API_KEY": "your_key"
+        "TRONGRID_API_KEY": "${TRONGRID_API_KEY}"
       }
     }
   }
@@ -264,17 +276,31 @@ OpenCode loads the bundled `.opencode/` plugin, which auto-discovers each skill 
 
 ## Available MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `get_all_markets` | All markets with supply/borrow APY, mining rewards, and TVL |
-| `get_dashboard` | Protocol overview: total supply, borrow, TVL, user count |
-| `get_supported_markets` | List the 8 bundled static balance/allowance shortcuts |
-| `get_jtoken_details` | Detailed jToken info: interest rate model, reserves, mining rewards |
-| `get_account_summary` | Health factor, liquidity, liquidation risk |
-| `get_account_data_from_api` | Comprehensive account data from API (positions, rewards) |
-| `get_trx_balance` | Native TRX balance |
-| `get_token_balance` | TRC20 token balance (USDT, USDD, etc.) |
-| `check_allowance` | Check TRC20 approval status for JustLend contracts |
+These are the bundled server's actual results, not the full server's payloads:
+
+| Tool | Result fields / shape |
+|------|-----------------------|
+| `get_all_markets` | Array: `symbol`, `jToken`, `supplyAPY`, `totalSupplyAPY`, `borrowAPY`, `tvlUSD`; optional `miningAPY`, `miningRewardPerDay`, `stakingAPY` |
+| `get_dashboard` | Upstream dashboard `data`, passed through without a locally fixed nested schema |
+| `get_supported_markets` | Static shortcut array: `symbol`, `jToken`, `underlying`, `decimals`, `isNative` |
+| `get_jtoken_details` | Upstream jToken detail `data`, passed through |
+| `get_account_summary` | `address`, `liquidityUSD`, `shortfallUSD`, `isLiquidatable`, `status` |
+| `get_account_data_from_api` | Upstream account `data`, passed through; not the summary tool's result |
+| `get_trx_balance` | `address`, `balance` (a human-readable TRX string, including the unit) |
+| `get_token_balance` | Recognized TRC20: `address`, `token`, `balance` (token-unit string); TRX: the native-balance shape above. Unknown symbols fail with `invalid_input` |
+| `check_allowance` | TRC20: `asset`, `spender`, `allowance`, `needsApproval`; native TRX: `asset`, `allowance: "Infinity"`, `needsApproval: false`, `note` |
+
+The summary does not compute `healthFactor`, `totalSupplyUSD`, `totalBorrowUSD`
+or `positions[]`. Market mapping does not return `tvl`, `totalSupply` or `totalBorrow`.
+Market APYs are formatted percentage strings and `tvlUSD` is a formatted USD
+string, not an unformatted numeric total. No wrapper adds these missing fields.
+
+Account USD values are two-decimal display strings. Use `isLiquidatable` and
+`status`, not a reparsed/rounded `shortfallUSD`, to read the current shortfall
+signal. A successful `SAFE` means no current Comptroller shortfall, not a
+guarantee about future prices or a proposed borrow. Nonzero contract error
+codes and malformed ABI results fail the query; treat account risk as unknown
+until a successful query, never synthesize `SAFE` from an error.
 
 Each read tool declares both `inputSchema` and `outputSchema`. Successful calls retain the legacy raw JSON text and add this MCP `structuredContent` envelope:
 
@@ -329,8 +355,8 @@ Real closed loops — user utterance → skill/tool routing → output → next 
 **User:** *"Is it worth borrowing USDT on JustLend right now, and can my account take it?"*
 1. Agent loads **`justlend-dao`** — this is a read question, no write skill needed.
 2. `get_all_markets` → USDT borrow APY and mining offset.
-3. `get_account_summary` → current health factor and borrow limit.
-4. **Output:** "USDT borrow APY is X% (Y% after mining). Your health factor is 2.1; borrowing $500 drops it to ~1.6 — still safe. To actually borrow you'll need the full server plus a wallet."
+3. `get_account_summary` → current liquidity, shortfall and query success.
+4. **Output:** "USDT borrow APY is X% (Y% after mining). The current Comptroller query reports no shortfall. This summary does not calculate a health factor or establish a safe size for a new borrow. To evaluate and submit a borrow, use the full server with a wallet and separately confirm the action."
 
 No funds move — the agent stops at advice because this project is read-only.
 
@@ -365,7 +391,7 @@ No funds move — the agent stops at advice because this project is read-only.
 - **Write operations live in the full server.** supply/borrow/repay/withdraw, sTRX staking, energy rental/direct purchase, and governance voting run through [@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend), which requires a **signing wallet**. When you enable those, the host MUST:
   - **confirm every write with the user (HITL)** before signing — show amount, market, and direction;
   - **never auto-retry a mutating call** (a repay / borrow / liquidate / vote may already have landed) — re-query state first;
-  - simulate / preview first, and prefer **Nile testnet** (`NETWORK=nile`) before mainnet.
+  - simulate / preview first; for a Nile test, configure and verify the **full server's** supported network explicitly. The bundled server is mainnet-only and rejects `NETWORK=nile`.
 - **Per-module risk (highest-consequence, irreversible):** `liquidate` (V2), `unstake` (sTRX — has an unbonding period), and `cast_vote` (locks JST as WJST until withdrawal). Treat these as destructive.
 
 ### Per-skill risk profile
@@ -403,7 +429,7 @@ No funds move — the agent stops at advice because this project is read-only.
 | **Wrong** skill fires (read when you meant write, or V1 vs V2) | overlapping triggers | the frontmatter carries negative triggers — state the operation explicitly ("supply", "borrow on V2") |
 | `401` / `403` on reads | missing or invalid `TRONGRID_API_KEY` | set a valid key in `.env`; verify with `node scripts/justlend_api.mjs markets` |
 | `429` / slow reads | TronGrid rate limit | back off and retry; upgrade the TronGrid plan for higher throughput |
-| Empty market/account data | key works but network mismatch | check `NETWORK` (`mainnet` vs `nile`) matches the address you're querying |
+| Non-mainnet configuration rejected | `NETWORK` requests an unsupported network | use `NETWORK=mainnet` for this bundled server; use a separately configured full server for testnets |
 | A write skill "does nothing" | full MCP server or signing wallet not installed | install [@justlend/mcp-server-justlend](https://github.com/justlend/mcp-server-justlend) and connect a wallet — the bundled server never signs |
 | MCP server won't start | Node version differs from the recommended 24.22.1, or deps not installed | `nvm install && nvm use`; check `node -v`; run `npm install` |
 | Behaviour changed after update | version / manifest drift | compare installed version with [`CHANGELOG.md`](CHANGELOG.md); re-run `npm install` and restart |

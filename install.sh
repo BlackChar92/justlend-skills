@@ -24,7 +24,7 @@ if [ ! -f .env ]; then
 # TronGrid API Key (required) — get from https://www.trongrid.io/
 TRONGRID_API_KEY=
 
-# Network: mainnet or nile (testnet)
+# Mainnet-only bundled queries; non-mainnet NETWORK values are rejected.
 NETWORK=mainnet
 EOL
     echo ""
