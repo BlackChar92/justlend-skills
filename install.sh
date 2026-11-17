@@ -6,7 +6,7 @@ echo ""
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
-    echo "Error: Node.js is not installed. Please install Node.js 24.22.1 first."
+    echo "Error: Node.js is not installed. Please install Node.js 24.22.3 first."
     echo "  https://nodejs.org/"
     exit 1
 fi

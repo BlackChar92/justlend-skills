@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js **24.22.1** (recommended)
+- Node.js **24.22.3** (recommended)
 - Git
 
 ## Installation
